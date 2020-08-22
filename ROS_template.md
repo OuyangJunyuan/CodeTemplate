@@ -155,6 +155,8 @@ target_link_libraries(${PROJECT_NAME}_node
 
 ## 启动文件
 
+详见：[launch/xml](http://wiki.ros.org/roslaunch/XML)
+
 ```xml
 <launch>
     <!--	<include file="xxx" ns="" />	-->
@@ -169,13 +171,65 @@ target_link_libraries(${PROJECT_NAME}_node
 
 
 
+## 参数服务器的参数文件yaml
 
+* 拓展:[ros参数](https://www.jianshu.com/p/6c1ec58b3f24)
 
+  ros参数服务器保持参数直到master被关闭，并且在各个ros程序间共用。
 
+  ``````launch
+  启动文件
+  <param name="ns/para" value="10.0" />
+    <rosparam>
+           a: 1
+           b: 2
+    </rosparam>
+    
+  <rosparam file="$(dirname)/../config/config.yaml" command="load" /> 
+  ``````
 
-## 参数服务器
+  yaml:
 
+  ```yaml
+  #注意: 和数字之间有一个  
+  #支持向量格式
+  
+  footprint: 		[[-0.325, -0.325], [-0.325, 0.325], [0.325, 0.325], [0.46, 0.0], [0.325, -0.325]]
+  floatvalue:		1.00
+  boolvalue:		true
+  #嵌套命名空间
+  base_scan_marking:		 {sensor_frame: base_laser, topic: /base_scan_marking, data_type}
+  ```
 
+  cpp:
+
+  ```c++
+  node.getParamNames(names)//names is a vetor
+  node.getParam(name);
+  node.setParam(name, value)；
+  node.hashParam(name)；//判断参数是否存在
+  node.param<变量类型>("参数名",变量,"参数不存在时默认值");
+  ```
+
+  
+
+* 程序入口参数
+
+  1. 启动文件launch启动时指定参数
+
+     ```launch中:	<arg name="my_args" default="arg1 arg2"/>```  default可被重新指定值覆盖。
+
+     ```terminal:	roslaunch xxxpack xxx.launch  my_args:=newvalue```
+
+     ```srccode-cpp:     std::cout<<"argv["<<i<<"] "<<argv[i]<<std::endl;```
+
+  2. node 传参数
+
+     ```launch中可以有: <node pkg="pack" type="node1" name="node1" args="$(arg my_args)"/>```
+
+     ```或者启动节点时候:rosrun xxxpack xxxexe arg1 arg2 或```
+
+     
 
 
 
