@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/ORB_exe.dir/src/main.cpp.o  -o bin/ORB_exe  -L"/home/ou/workspace/clion_ws/ORB/ ./lib" 

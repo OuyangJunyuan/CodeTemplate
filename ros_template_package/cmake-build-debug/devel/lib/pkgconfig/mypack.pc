@@ -1,0 +1,8 @@
+prefix=/home/ou/ros_ws/src/mypack/cmake-build-debug/devel
+
+Name: mypack
+Description: Description of mypack
+Version: 0.0.0
+Cflags: -I/home/ou/ros_ws/src/mypack/cmake-build-debug/devel/include
+Libs: -L${prefix}/lib 
+Requires: roscpp rospy std_msgs message_runtime

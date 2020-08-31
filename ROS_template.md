@@ -6,12 +6,16 @@
 #include <sstream>  //stringstream
 #include <unistd.h> //有sleep usleep
 #include <stdint> //uint16 uint32 uint64...
-
+#include <chrono> //chrono::steady_clock::time_point  t1=chrono::steady_clock::now(); chrono::duration<double> = chrono::duration_cast<chrono::duration<double>> (t2-t1);
+#include <boost/format.hpp> //格式化字符串: boost::format fmt(./%s/%s%d.%s); string fs=(fmt%"color"%"image_"%i%"png").str();//fs="./color/image_i.png"
 
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "geometry_msgs/Twist.h"
+
+#include <opencv2/opencv.hpp> //OpenCV库
+#include <ceres/ceres.h> //ceres优化库
 ```
 
 
@@ -23,12 +27,17 @@
 ```cmake
 ############################################################################################
 ##                                          常用宏
-##                                      PROJECT_NAME
+##                                      ${PROJECT_NAME}
+##										${PROJECT_SOURCE_DIR} 本文件地址
+##										${PROJECT_BINARY_DIR})  编译地址
+##											输出信息
+##										message(STATUS "xxx ${xxx}")
 ############################################################################################
 cmake_minimum_required(VERSION 3.0.2)
 ##需和xml文件中的name一致
-project(mypack)
-# add_compile_options(-std=c++11)
+project(mypack) 
+#set( CMAKE_BUILD_TYPE "Release" )  #release模式
+#set( CMAKE_CXX_FLAGS "-std=c++11 -O3" ) #c++11   o3优化
 
 ############################################################################################
 ##                                       ros packages
@@ -54,42 +63,82 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
 )
 ############################################################################################
-##                                      non-ros packages
+##                                      non-ros packages:具体路径宏可以查询<库名Config.cmake>查看定义
 ## <name>_FOUND
-## <name>_INCLUDE_DIRS
-## <name>_LIBRARIES
+## <name>_INCLUDE_DIRS  /  <name>_DIRS
+## <name>_LIBRARIES  /  <name>_LIBS  /  <name>_LIBRARY
 ############################################################################################
 ##                          当前目录下放的头文件
 #####################################################
-#添加头文件目录 
-#include_directories(''./include'')
-#添加库文件目录 
-#link_directories(" ./lib")
+#添加头文件目录
+#include_directories(''./include'')  #相对于CMakeLists.txt
+#添加库文件目录
+#link_directories(" ./lib")  #相对于执行CMake的目录或路径一般是在
 #添加所有源文件名到SRC_DIRS中
-#aux_source_directory(. SRC_DIRS)
-#EXECUTABLE_OUTPUT_PATH
-#LIBRARY_OUTPUT_PATH
+#aux_source_directory(./src  SRC_DIRS)
+#set(EXECUTABLE_OUTPUT_PATH ./bin)
+#set(LIBRARY_OUTPUT_PATH ./lib)
+
 
 
 
 ##                          Eigen
-#include_directories("/usr/include/eigen3")
+#find_package(Eigen3  REQUIRED)
+#include_directories(${Eigen3_INCLUDE_DIRS})
+#list(APPEND ALL_LIBS ${Eigen3_LIBRARIES})
 
-##                          EBoost
+##                          Boost
 #find_package(Boost REQUIRED COMPONENTS
-# system
+# system  # format 
 #)
+#include_directories(${Boost_INCLUDE_DIRS})
+#list(APPEND ALL_LIBS ${Boost_LIBRARIES})
 
 ##                          OpenCV
 #find_package(OpenCV  REQUIRED)
 #include_directories(${OpenCV_INCLUDE_DIRS})
+#list(APPEND ALL_LIBS ${OpenCV_LIBRARIES})
 
+##                          Sophus
+#find_package(Sophus REQUIRED) 
+#include_directories(${Sophus_INCLUDE_DIRS}) #link  ${Sophus_LIBRARIES}
+#list(APPEND ALL_LIBS ${Sophus_LIBRARIES})
+
+##							Ceres
+find_package( Ceres REQUIRED )
+include_directories( ${CERES_INCLUDE_DIRS} ) #link  ${CERES_LIBRARIES} 
+#list(APPEND ALL_LIBS ${CERES_LIBRARIES})
+
+##                         G2O
+#find_package(g2o REQUIRED)
+#include_directories(${G2O_INCLUDE_DIRS}) 
+#list(APPEND ALL_LIBS ${G2O_LIBRARIES})
+
+##                         glog
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /usr/local/lib/cmake)
+#find_package(Glog REQUIRED)
+#include_directories(${GLOG_INCLUDE_DIRS}) #link   ${GLOG_LIBRARIES}
+#list(APPEND ALL_LIBS ${GLOG_LIBRARIES})
+
+##                         gtest
+#find_package(GTest REQUIRED)
+#include_directories(${GTEST_INCLUDE_DIRS}) #link  ${GTEST_BOTH_LIBRARIES}
+#list(APPEND ALL_LIBS ${GTEST_LIBRARIES})
+
+##                         gflags
+#find_package(GFlags REQUIRED)
+#include_directories(${GFLAGS_INCLUDE_DIRS}) #link  ${GFLAGS_LIBRARIES}
+#list(APPEND ALL_LIBS ${GFLAGS_LIBRARIES})
 
 ############################################################################################
 ##                                       build
 ############################################################################################
 ##                     generate libs like .s .so
 #####################################################
+#MESSAGE(WARNING xxxx)会让字体变红色方便观看。
+#MESAAGE(ERROR xxx) 会终止CMAKE
+MESSAGE(STATUS "This is BINARY dir :${${PROJECT_NAME}_BINARY_DIR}")
+MESSAGE(STATUS "This is SOURCE dir :${${PROJECT_NAME}_SOURCE_DIR}")
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/mypackage.cpp
 # )
