@@ -12,6 +12,8 @@ find_package( Sophus REQUIRED)
 include_directories(${Sophus_INCLUDE_DIRS})
 ```
 
+使用Isometry的时候一定要给单位矩阵初值再进行.rotate和pretranslate变换，否则答案会是随机数。
+
 
 
 ## 矩阵操作

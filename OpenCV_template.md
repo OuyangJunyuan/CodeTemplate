@@ -13,7 +13,7 @@
 ############################################################################################
 cmake_minimum_required(VERSION 3.0.2)
 ##需和xml文件中的name一致
-project(mypack) 
+project(mypack)
 #set( CMAKE_BUILD_TYPE "Release" )  #release模式
 #set( CMAKE_CXX_FLAGS "-std=c++11 -O3" ) #c++11   o3优化
 
@@ -27,11 +27,11 @@ project(mypack)
 ##                          当前目录下放的头文件
 #####################################################
 #添加头文件目录 
-#include_directories(''./include'')  #相对于CMakeLists.txt
+include_directories(''./include'')  #相对于CMakeLists.txt
 #添加库文件目录  
-#link_directories(" ./lib")  #相对于执行CMake的目录或路径一般是在
+link_directories(" ./lib")  #相对于执行CMake的目录或路径一般是在
 #添加所有源文件名到SRC_DIRS中
-#aux_source_directory(./src  SRC_DIRS)
+aux_source_directory(./src  SRCS_FILES)
 #EXECUTABLE_OUTPUT_PATH(./bin)
 #LIBRARY_OUTPUT_PATH(./lib)
 
@@ -50,9 +50,9 @@ project(mypack)
 #list(APPEND ALL_LIBS ${Boost_LIBRARIES})
 
 ##                          OpenCV
-#find_package(OpenCV  REQUIRED)
-#include_directories(${OpenCV_INCLUDE_DIRS})
-#list(APPEND ALL_LIBS ${OpenCV_LIBRARIES})
+find_package(OpenCV  REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+list(APPEND ALL_LIBS ${OpenCV_LIBRARIES})
 
 ##                          Sophus
 #find_package(Sophus REQUIRED) 
@@ -60,8 +60,8 @@ project(mypack)
 #list(APPEND ALL_LIBS ${Sophus_LIBRARIES})
 
 ##							Ceres
-find_package( Ceres REQUIRED )
-include_directories( ${CERES_INCLUDE_DIRS} ) #link  ${CERES_LIBRARIES} 
+#find_package( Ceres REQUIRED )
+#include_directories( ${CERES_INCLUDE_DIRS} ) #link  ${CERES_LIBRARIES}
 #list(APPEND ALL_LIBS ${CERES_LIBRARIES})
 
 ##                         G2O
@@ -70,7 +70,7 @@ include_directories( ${CERES_INCLUDE_DIRS} ) #link  ${CERES_LIBRARIES}
 #list(APPEND ALL_LIBS ${G2O_LIBRARIES})
 
 ##                         glog
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /usr/local/lib/cmake)
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /usr/local/lib/cmake)
 #find_package(Glog REQUIRED)
 #include_directories(${GLOG_INCLUDE_DIRS}) #link   ${GLOG_LIBRARIES}
 #list(APPEND ALL_LIBS ${GLOG_LIBRARIES})
@@ -91,7 +91,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} /usr/local/lib/cmake)
 ##                     generate libs like .s .so
 #####################################################
 MESSAGE(STATUS "This is BINARY dir " ${HELLO_BINARY_DIR})
-MESSAGE(STATUS "This is SOURCE dir "${HELLO_SOURCE_DIR})
+MESSAGE(STATUS "This is SOURCE dir " ${HELLO_SOURCE_DIR})
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/mypackage.cpp
 # )
@@ -101,20 +101,20 @@ MESSAGE(STATUS "This is SOURCE dir "${HELLO_SOURCE_DIR})
 #####################################################
 ##                          node
 #####################################################
-add_executable(${PROJECT_NAME}_node src/node.cpp)
-##可执行文件内有用到自定义消息类型时启用,否则无法生成消息头文件
-#add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_node
-        ${catkin_LIBRARIES}
-        )
+#add_executable(${PROJECT_NAME}_node src/main.cpp)
+###可执行文件内有用到自定义消息类型时启用,否则无法生成消息头文件
+##add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(${PROJECT_NAME}_node
+#        ${catkin_LIBRARIES}
+#        )
 
 #####################################################
 ##                         non-node
 #####################################################
-#add_executable(${PROJECT_NAME}_node src/node.cpp)
-#target_link_libraries(${PROJECT_NAME}_node
-#        ${catkin_LIBRARIES}
-#        )
+add_executable(${PROJECT_NAME}_node ${SRCS_FILES})
+target_link_libraries(${PROJECT_NAME}_node
+        ${ALL_LIBS}
+        )
 
 ```
 
@@ -156,6 +156,44 @@ int main(int argc, char **argv)
 Mat a = Mat_<double>(3,2)<< 1,2,3,4,5,6;
 
 hconcat(A, B, C);//把B合并在A的右边，把结果保留在C中。
+```
+
+
+
+### 矩阵拷贝
+
+```c++
+Mat A=B
+Mat A=B(Rect(1,2,3,4));
+//赋值和构造函数出来的都是共享内存的。
+
+//而一下两者是重开内存。
+roi=B.clone() //但是有差别，clone无论roi是否已经开过内存了，直接指向新开的clone内存。
+B.copyTo(roi) //如果roi共享了别的图像roi内存，则不再分配新内存，直接修改原图roi位置。
+
+//比如一下操作就是真正的roi操作
+Mat roi=inputImage(Rect(Point(50,50),Point(100,100)));
+Mat blue=Mat::zeros(50,50,CV_8UC(3));
+blue.copyTo(roi);
+//会把inputimage中roi对应位置涂成黑色。
+    
+//惊奇的发现std::vector 的.pushback()是调用构造函数的。而Mat的构造函数是共享数据内存，新建Mat头部而已。
+        vector<Mat> rois;
+        rois.push_back(inputImage(Rect(50,50,50,50)));
+        rois[0].setTo(Scalar(255,0,0));
+//结果也可以吧inputImage的5050区域涂蓝色
+```
+
+![这里写图片描述](https://img-blog.csdn.net/20170228174132012?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvY2hhaXBwMDYwNw==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+这里就可以看出，共享内存的构造和复制都是很快的。而copyto非常慢，因为需要重写大块内存。
+
+### roi
+
+```
+img2=img(Rect(sx, sy, width, height));
+img2=img(Rect(Point(lu.x,lu.y),Point(rb.x,rb.y)));
+img3=img(Range(100, 200), Range(100,200));
 ```
 
 
@@ -385,6 +423,18 @@ void triangulation(
 ```
 
 
+
+## 帧数计算
+
+```c++
+#include <chrono>
+
+chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+//doing somethings
+chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>( t2-t1 );
+cout<<"solve time cost = "<<time_used.count()<<" seconds. "<<en
+```
 
 
 

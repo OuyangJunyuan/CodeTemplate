@@ -52,13 +52,13 @@ include_directories(
 ##                          当前目录下放的头文件
 #####################################################
 #添加头文件目录
-#include_directories(''./include'')
+include_directories(''./include'')  #相对于CMakeLists.txt
 #添加库文件目录
-#link_directories(" ./lib")
+link_directories(" ./lib")  #相对于执行CMake的目录或路径一般是在
 #添加所有源文件名到SRC_DIRS中
-#aux_source_directory(. SRC_DIRS)
-#EXECUTABLE_OUTPUT_PATH
-#LIBRARY_OUTPUT_PATH
+aux_source_directory(./src  SRCS_FILES)
+#EXECUTABLE_OUTPUT_PATH(./bin)
+#LIBRARY_OUTPUT_PATH(./lib)
 
 ##                          Eigen
 #include_directories("/usr/include/eigen3")

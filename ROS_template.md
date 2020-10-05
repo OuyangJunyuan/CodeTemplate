@@ -84,8 +84,7 @@ include_directories(
 
 ##                          Eigen
 #find_package(Eigen3  REQUIRED)
-#include_directories(${Eigen3_INCLUDE_DIRS})
-#list(APPEND ALL_LIBS ${Eigen3_LIBRARIES})
+#include_directories(${EIGEN3_INCLUDE_DIRS})
 
 ##                          Boost
 #find_package(Boost REQUIRED COMPONENTS

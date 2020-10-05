@@ -44,7 +44,7 @@ include_directories(
 ##                          当前目录下放的头文件
 #####################################################
 #添加头文件目录
-#include_directories(''./include'')  #相对于CMakeLists.txt
+#include_directories('./include')  #相对于CMakeLists.txt
 #添加库文件目录
 #link_directories(" ./lib")  #相对于执行CMake的目录或路径一般是在
 #添加所有源文件名到SRC_DIRS中
@@ -56,8 +56,7 @@ include_directories(
 
 ##                          Eigen
 #find_package(Eigen3  REQUIRED)
-#include_directories(${Eigen3_INCLUDE_DIRS})
-#list(APPEND ALL_LIBS ${Eigen3_LIBRARIES})
+include_directories(${EIGEN3_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}/Eigen)
 
 ##                          Boost
 #find_package(Boost REQUIRED COMPONENTS
