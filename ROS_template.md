@@ -78,7 +78,9 @@ include_directories(
 #aux_source_directory(./src  SRC_DIRS)
 #set(EXECUTABLE_OUTPUT_PATH ./bin)
 #set(LIBRARY_OUTPUT_PATH ./lib)
-
+	#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/controllers/mywebotsdemo_node)
+	#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/bin)   
+	#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/../bin) 
 
 
 
@@ -209,15 +211,20 @@ target_link_libraries(${PROJECT_NAME}_node
 <launch>
     <!--	<include file="xxx" ns="" />	-->
     <arg name="arg1" value="$(dirname)" />
-    <node pkg="mypack" name="node" type="mypack_node" >
+     <!--	required will teminat other living node  when this node shut down	-->
+    <node pkg="mypack" name="node" type="mypack_node" required="true" clear_params="true" >
   	    <param  name="launchpath"	 value="$(arg arg1)" />
 	    <rosparam file="$(dirname)/../config/config.yaml" command="load" />
+        <rosparam file="$(find packagename)/../config/config.yaml" command="load" />
+        <rosparam file="$(env ENVIRENMENTVALUE_FOR_PATH)/../config/config.yaml" command="load" />
     </node>
 </launch>
 
 ```
 
+设置环境变量需要export ENVIRENMENTVALUE_FOR_PATH=xxxxx
 
+如果不想每次启动文件前都需要输入环境变量，就写一个bash脚本 先export然后再launch。这样每次只需要运行bash脚本就可以了
 
 ## 参数服务器的参数文件yaml
 
@@ -282,6 +289,8 @@ target_link_libraries(${PROJECT_NAME}_node
 
 
 ## 自定义消息类型
+
+如果需要用到自定义消息类型，应该有一个包是专门产生消息类型的，而不进行任何可执行文件的生成
 
 ```
 Header header
@@ -393,7 +402,7 @@ int main(int argc, char **argv)
         //注意spinOnce()区别:spinOnce只读取当前消息队列第一个元素调用callback后返回;spin直接堵塞，一有消息进队就调用回调，否则原地死循环。
         ros::spinOnce();
         //根据ros::Rate loop_rate(10)指定的频率，自动记录上次sleep到本次sleep之间的时间，然后休眠直到超过对应频率的延时。        
-        loop_rate.sleep();
+        loop_rate.sleep();//或直接用 ros::Duration(0.5).sleep(); //second
     }
     return 0;
 }
@@ -417,6 +426,12 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "listener");
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("chatter", 1000, chatterCallback);
+  //注意：当使用的回调函数是类成员函数的时候，需要使用
+    	//类内函数调用 这句sub = nh.subscribe<nav_msgs::Odometry>("odom", 1, boost::bind(&PatrolRobot::odomCB, this, _1));  
+    										//或sub = nh.subscribe<nav_msgs::Odometry>("odom", 1,&PatrolRobot::odomCB, this));  
+        //类外语句实现 sub = nh.subscribe<nav_msgs::Odometry>("odom", 1,&PatrolRobot::odomCB, &类的实例对象));  
+    	//_1是占位符，类成员函数odomCB只有一个参数故只需要传入1个占位符。如果需要传入真实参数，则使用
+    	//详情：https://www.cnblogs.com/feixiao5566/p/4791990.html 或我自己的简述－Ｃ＋＋零碎知识
   //注意spinOnce()区别:spinOnce只读取当前消息队列第一个元素调用callback后返回;spin直接堵塞，一有消息进队就调用回调，否则原地死循环直到ctl+c
   ros::spin();
   return 0;
@@ -567,6 +582,12 @@ add_dependencies(server_exe_name beginner_tutorials_gencpp)
 
 再启动服务器，具体使用可以运行程序传参进行请求得到回应然后结束，也可以是在程序内进行不断请求和回应轮寻。
 
+
+
+$$
+dim(V)=dim(kernal(A))+rank(A)\\
+dim(V)=dim(kernal(A))+dim(Img(A))\\
+$$
 
 
 

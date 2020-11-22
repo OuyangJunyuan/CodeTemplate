@@ -1,9 +1,0 @@
-
-<launch>
-    <!--<include file="xxx" ns="" />-->
-    <arg name="arg1" value="$(dirname)" />
-    <node pkg="mypack" name="node" type="mypack_node" >
-  	    <param  name="launchpath"	 value="$(arg arg1)" />
-	    <rosparam file="$(dirname)/../config/config.yaml" command="load" />
-    </node>
-</launch>

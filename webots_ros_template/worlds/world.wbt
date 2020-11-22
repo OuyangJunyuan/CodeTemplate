@@ -1,0 +1,126 @@
+#VRML_SIM R2020b utf8
+WorldInfo {
+  basicTimeStep 1
+}
+Viewpoint {
+  orientation 0.5660665611288507 0.5124467008442881 0.645729840696217 1.9725838472854111
+  position 3.469281388228875 0.5269881299298048 0.7236741107409895
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  translation 0 0.83 -5.08212e-17
+  rotation 1 0 0 1.5707963267948966
+  floorSize 3 3
+}
+DEF arrow Solid {
+  translation 0.105 0 0.4
+  rotation 0 1 0 3.14159
+  children [
+    Connector {
+      translation 0.035 0 0
+      model "arm_cnt"
+      autoLock TRUE
+    }
+    DEF arrow_shape Shape {
+      geometry Cylinder {
+        height 0.2
+        radius 0.005
+      }
+    }
+  ]
+  boundingObject USE arrow_shape
+  physics Physics {
+    density 100
+  }
+}
+DEF arm Robot {
+  translation 0 0 0.15
+  rotation 1 0 0 1.5707
+  children [
+    Transform {
+      translation 0.07 0.15 0
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis -1 0 0
+          }
+          device [
+            PositionSensor {
+              name "arm angle sensor"
+            }
+            RotationalMotor {
+              name "arm motor"
+              maxVelocity 100
+            }
+          ]
+          endPoint Solid {
+            translation 0 0.05 0
+            rotation -1 0 0 0
+            children [
+              Connector {
+                translation 0 0.05 0
+                rotation -0.9999999999999999 0 0 1.5707
+                model "arm_cnt"
+                isLocked TRUE
+                autoLock TRUE
+              }
+              Shape {
+                appearance VarnishedPine {
+                }
+                geometry Cylinder {
+                  height 0.1
+                  radius 0.015
+                }
+              }
+            ]
+            boundingObject Shape {
+              appearance Appearance {
+                texture ImageTexture {
+                  url [
+                    "textures/wood.jpg"
+                  ]
+                }
+              }
+              geometry Cylinder {
+                height 0.1
+                radius 0.015
+              }
+            }
+            physics Physics {
+            }
+          }
+        }
+      ]
+    }
+    DEF BaseLink_Shape Shape {
+      appearance Appearance {
+        texture ImageTexture {
+          url [
+            "textures/wood.jpg"
+          ]
+        }
+      }
+      geometry Cylinder {
+        height 0.3
+        radius 0.05
+      }
+    }
+  ]
+  boundingObject USE BaseLink_Shape
+  physics Physics {
+  }
+  controller "my_controller"
+  controllerArgs [
+    ""
+  ]
+}
+SolidPipe {
+  translation 0.13 1.9 -8.66947e-05
+  rotation 1 0 0 1.5707
+  height 0.2
+  radius 0.1
+  thickness 0.01
+}

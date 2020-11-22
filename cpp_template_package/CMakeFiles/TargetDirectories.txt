@@ -1,3 +1,0 @@
-/home/ou/workspace/clion_ws/ORB/CMakeFiles/rebuild_cache.dir
-/home/ou/workspace/clion_ws/ORB/CMakeFiles/ORB_exe.dir
-/home/ou/workspace/clion_ws/ORB/CMakeFiles/edit_cache.dir

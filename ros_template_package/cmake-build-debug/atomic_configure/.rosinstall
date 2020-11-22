@@ -1,2 +1,0 @@
-- setup-file:
-    local-name: /home/ou/ros_ws/src/mypack/cmake-build-debug/devel/setup.sh
