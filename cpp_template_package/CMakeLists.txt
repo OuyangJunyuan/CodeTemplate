@@ -67,6 +67,7 @@ find_package(catkin REQUIRED COMPONENTS
         sensor_msgs
         #message_generation
         )
+include_directories( ${catkin_INCLUDE_DIRS})
 catkin_package(
         #  INCLUDE_DIRS include
         #  LIBRARIES mypack
@@ -75,16 +76,13 @@ catkin_package(
         #catkin_project的依赖
         #  DEPENDS system_lib   #非catkin project的依赖
 )
-include_directories( ${catkin_INCLUDE_DIRS})
 list(APPEND ALL_LIBS ${catkin_LIBRARIES})
-
 
 ##                          gazebo
 #find_package(gazebo REQUIRED)
 #include_directories(${GAZEBO_INCLUDE_DIRS})
 #list(APPEND ALL_LIBS ${GAZEBO_LIBRARY_DIRS})
 #list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
-
 
 ##                          Eigen
 find_package(Eigen3  REQUIRED)

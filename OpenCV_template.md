@@ -433,7 +433,7 @@ chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
 //doing somethings
 chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
 chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>( t2-t1 );
-cout<<"solve time cost = "<<time_used.count()<<" seconds. "<<en
+cout<<"solve time cost = "<<time_used.count()<<" seconds. "<<endl
 ```
 
 

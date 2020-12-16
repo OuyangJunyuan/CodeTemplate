@@ -246,7 +246,7 @@ target_link_libraries(${PROJECT_NAME}_node
   yaml:
 
   ```yaml
-  #注意: 和数字之间有一个  
+  #注意: 和数字之间有一个 空格 
   #支持向量格式
   
   footprint: 		[[-0.325, -0.325], [-0.325, 0.325], [0.325, 0.325], [0.46, 0.0], [0.325, -0.325]]
@@ -381,10 +381,10 @@ int main(int argc, char **argv)
     //rosnode list 中出现的是 <nodename> 由第三个参数
     ros::init(argc, argv, "talker");
     //作为和ROS通信的主要途径：在第一个Handle被完全初始化本节点；在最后销毁一个的Handle来完全关闭节点
-    ros::NodeHandle n;
+    ros::NodeHandle n;//n("~")表示使用私有命名空间，发布的话题或参数前会加上节点名如："/talker/..."
     //发布到的话题名，在本节点名称空间下/nodename/topicname，第二个参数为消息队列大小，还可以指定话题被接受者连接与断开连接回调函数。
     ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
-    ros::Rate loop_rate(10);
+        ros::Rate loop_rate(10);
 
     std_msgs::String msg;
     while (ros::ok())
@@ -408,7 +408,29 @@ int main(int argc, char **argv)
 }
 ```
 
+python
 
+```python
+#！env/usr/bin python3/python
+import rospy
+from std_msgs.msg import String
+
+def talker():
+    pub = rospy.Publisher('chatter', String, queue_size=10)
+    rospy.init_node('talker', anonymous=True)
+    rate = rospy.Rate(10) # 10hz
+    while not rospy.is_shutdown():
+        hello_str = "hello world {0}".format(rospy.get_time())
+        rospy.loginfo(hello_str)#替换ROS_INFO
+        pub.publish(hello_str)
+        rate.sleep()
+
+if __name__ == '__main__':
+    try:
+        talker()
+    except rospy.ROSInterruptException:
+        pass
+```
 
 ### 接受节点
 
@@ -438,7 +460,33 @@ int main(int argc, char **argv)
 }
 ```
 
+python
 
+```python
+#！env/usr/bin python3/python
+import rospy
+from std_msgs.msg import String
+
+def callback(data):
+    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+    
+def listener():
+
+    # In ROS, nodes are uniquely named. If two nodes with the same
+    # name are launched, the previous one is kicked off. The
+    # anonymous=True flag means that rospy will choose a unique
+    # name for our 'listener' node so that multiple listeners can
+    # run simultaneously.
+    rospy.init_node('listener', anonymous=True)
+
+    rospy.Subscriber("chatter", String, callback)
+
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()
+```
 
 ## 服务
 
@@ -523,7 +571,25 @@ int main(int argc, char **argv)
 }
 ```
 
+python
 
+```python
+from beginner_tutorials.srv import AddTwoInts,AddTwoIntsResponse
+import rospy
+
+def handle_add_two_ints(req):
+    print("Returning [%s + %s = %s]"%(req.a, req.b, (req.a + req.b)))
+    return AddTwoIntsResponse(req.a + req.b)
+
+def add_two_ints_server():
+    rospy.init_node('add_two_ints_server')
+    s = rospy.Service('add_two_ints', AddTwoInts, handle_add_two_ints)
+    print("Ready to add two ints.")
+    rospy.spin()
+
+if __name__ == "__main__":
+    add_two_ints_server()
+```
 
 ### 客户端
 
@@ -561,7 +627,35 @@ int main(int argc, char **argv)
 }
 ```
 
+python
 
+```python
+import sys
+import rospy
+from beginner_tutorials.srv import *
+
+def add_two_ints_client(x, y):
+    rospy.wait_for_service('add_two_ints')
+    try:
+        add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
+        resp1 = add_two_ints(x, y)
+        return resp1.sum
+    except rospy.ServiceException as e:
+        print("Service call failed: %s"%e)
+
+def usage():
+    return "%s [x y]"%sys.argv[0]
+
+if __name__ == "__main__":
+    if len(sys.argv) == 3:
+        x = int(sys.argv[1])
+        y = int(sys.argv[2])
+    else:
+        print(usage())
+        sys.exit(1)
+    print("Requesting %s+%s"%(x, y))
+    print("%s + %s = %s"%(x, y, add_two_ints_client(x, y)))
+```
 
 CMakeList
 
@@ -591,4 +685,4 @@ $$
 
 
 
-
+p
