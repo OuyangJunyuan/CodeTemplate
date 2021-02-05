@@ -2,6 +2,8 @@
 
 ## [错误解决](#issue)
 
+[官方提问论坛](https://answers.gazebosim.org/questions/scope:all/sort:activity-desc/page:1/query:gray%20image/)
+
 ## API
 
 [gazebo api](http://gazebosim.org/api)
@@ -59,9 +61,11 @@ Gazebo使用了一个分布式架构，其中有独立的库，用于物理模�
 
 ## 模型
 
+[下载](https://app.ignitionrobotics.org/fuel/models)
+
 ### 模型路径设置
 
-模型构建完毕后可以```export GAZEBO_MODEL_PATH=$HOME/gazebo_plugin_tutorial/models:$GAZEBO_MODEL_PATH```来添加路径到环境变量
+模型构建完毕后可以```export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:yourpath```来添加路径到环境变量
 
 查看环境变量可以用`env | grep GAZEBO_MODEL_PATH`
 
@@ -110,6 +114,168 @@ http://gazebosim.org/tutorials?tut=dem&cat=build_world
 ### 大量相同模型(如人群)
 
 http://gazebosim.org/tutorials?tut=model_population&cat=build_world
+
+### 贴图纹理
+
+http://gazebosim.org/tutorials?tut=color_model&cat=
+
+http://gazebosim.org/tutorials?tut=lightmap&cat=rendering
+
+### 动画
+
+http://gazebosim.org/tutorials?tut=actor&cat=build_robot
+
+```xml
+<?xml version="1.0" ?>
+<sdf version="1.6">
+   <world name="default">
+      <include>
+         <uri>model://ground_plane</uri>
+      </include>
+      <include>
+         <uri>model://sun</uri>
+      </include>
+      <actor name="animated_box">
+        <link name="box_link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>.2 .2 .2</size>
+              </box>
+            </geometry>
+          </visual>
+        </link>
+        <script>
+          <loop>true</loop>
+          <auto_start>true</auto_start>
+          <trajectory id="0" type="square">
+             <waypoint>
+                <time>0.0</time>
+                <pose>-1 -1 1 0 0 0</pose>
+             </waypoint>
+             <waypoint>
+                <time>1.0</time>
+                <pose>-1 1 1 0 0 0</pose>
+             </waypoint>
+             <waypoint>
+                <time>2.0</time>
+                <pose>1 1 1 0 0 0</pose>
+             </waypoint>
+             <waypoint>
+                <time>3.0</time>
+                <pose>1 -1 1 0 0 0</pose>
+             </waypoint>
+             <waypoint>
+                <time>4.0</time>
+                <pose>-1 -1 1 0 0 0</pose>
+             </waypoint>
+          </trajectory>
+        </script>
+      </actor>
+   </world>
+</sdf>
+```
+
+这里用的是 motion along trajectory格式的动画，用link设置动画实体。用script设置路径点
+
+下面是用.dae指定skin的skeleton骨架动画：dae之前用来做3d模型的mesh文件，但其实是骨架网格，内部是包含骨架动画的。只是用来做visual和colilde时候不使用其骨架动画而只使用骨架网格。
+
+允许只指定skin这样animation默认使用skin的.dae文件内的网格动画，也可以重新指定使用别.dae的网格动画，但是外形使用skin的mesh文件。
+
+查看本链接学习[骨架动画](http://www.wazim.com/Collada_Tutorial_1.htm)
+
+```xml
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <actor name="actor">
+      <skin>
+        <filename>walk.dae</filename>
+      </skin>
+      <animation name="animation">
+        <filename>moonwalk.dae</filename>
+      </animation>
+    </actor>
+  </world>
+</sdf>
+```
+
+下面学习如何将轨迹和动画结合起来。只需要将skin+animation和之前的script轨迹脚本结合。并且设置animation的name和trajectory的type一致，以将轨迹和动画绑定起来。
+
+```xml
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <actor name="actor">
+      <skin>
+        <filename>walk.dae</filename>
+      </skin>
+      <animation name="walking">
+        <filename>walk.dae</filename>
+      </animation>
+      <script>
+        <trajectory id="0" type="walking">
+          <waypoint>
+            <time>0</time>
+            <pose>0 2 0 0 0 -1.57</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor>
+  </world>
+</sdf>
+```
+
+如果动画速度和轨迹设置时间不匹配，就会出现走路打滑，这时候可以在animation中增加`        <interpolate_x>true</interpolate_x>`
+
+```xml
+      <animation name="walking">
+        <filename>walk.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+```
+
+
+
+
+
+然后下面说如何通过增加插件来进行闭环轨迹动画。
+
+`gazebo worlds/cafe.world`
+
+```xml
+<actor name="actor1">
+  <pose>0 1 1.25 0 0 0</pose>
+  <skin>
+    <filename>moonwalk.dae</filename>
+    <scale>1.0</scale>
+  </skin>
+  <animation name="walking">
+    <filename>walk.dae</filename>
+    <scale>1.000000</scale>
+    <interpolate_x>true</interpolate_x>
+  </animation>
+  <plugin name="actor1_plugin" filename="libActorPlugin.so">
+    <target>0 -5 1.2138</target>
+    <target_weight>1.15</target_weight>
+    <obstacle_weight>1.8</obstacle_weight>
+    <animation_factor>5.1</animation_factor>
+    <ignore_obstacles>
+      <model>cafe</model>
+      <model>ground_plane</model>
+    </ignore_obstacles>
+  </plugin>
+</actor>
+```
+
+插件[代码](https://raw.githubusercontent.com/osrf/gazebo/master/plugins/ActorPlugin.cc)、[头文件](https://raw.githubusercontent.com/osrf/gazebo/master/plugins/ActorPlugin.hh)
+
+
 
 
 
@@ -1494,6 +1660,49 @@ rosservice call /rrbot/controller_manager/switch_controller "{start_controllers:
 
 
 
+#### 想使用名称空间
+
+第一步：
+
+```xml
+    <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <robotNamespace>/Default</robotNamespace>
+      </plugin>
+    </gazebo>
+```
+
+第二步：关节配置增加前缀Default
+
+```yaml
+Default:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+```
+
+第三步：启动文件修改 增加ns属性
+
+```xaml
+<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="true"
+      output="screen" ns="Default"
+      args="
+      joint_state_controller
+      WaistJoint_position_controller
+      ArmBaseJoint_position_controller
+      Arm12Joint_position_controller
+      Arm23Joint_position_controller"/>
+
+
+
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+	respawn="false" output="screen">
+    <remap from="/joint_states" to="/$(arg namespace)/joint_states" />
+
+```
+
 
 
 ### [gazebo和ros通信](http://gazebosim.org/tutorials?cat=guided_i&tut=guided_i6)
@@ -1862,3 +2071,7 @@ rostopic pub -r 20 /gazebo/set_model_state gazebo_msgs/ModelState '{model_name: 
       <mass>0.1</mass>
 </inertial>
 ```
+
+问题3：高程图或者模型点开后闪退，需要升级到gazebo9.16以上。[参考](https://bitbucket.org/DataspeedInc/velodyne_simulator/src/506664dd478984aa6645d8210802a4a7ddc40629/gazebo_upgrade.md)
+
+问题4：高程图更新地形图片后，加载到gazebo中发现不变，原因是gazebo默认调用同名模型的缓存来加快启动速度，其缓存在`~/.gazebo/paging`中，删除后重新加载即可。

@@ -162,11 +162,15 @@ http://gazebosim.org/tutorials?tut=ros_urdf&cat=connect_ros
   类似于#ifndef xxx 条件编译
 
   ```xml
-  <xacro:if value="<expression>"> <!--          value="${var.startswith('use') and var.endswith('it')}"        value="${ var == '123' }"      -->
-      <... some xml code here ...>
-  </xacro:if>
+  可以很有用的实现一个条件赋值语句
+     <xacro:if value="${gpu}">
+        <xacro:property name="lib" value="gazebo_ros_custom_gpu_lidar"/>
+      </xacro:if>
+    <xacro:unless value="${gpu}">
+        <xacro:property name="lib" value="gazebo_ros_custom_lidar"/>
+      </xacro:unless>
   ```
-
+  
   
 
 ### 传入宏与启动

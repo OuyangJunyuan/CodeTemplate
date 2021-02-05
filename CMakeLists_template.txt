@@ -47,10 +47,11 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
                                     #### some tips ####
 ## if didn't find packages,you can try to ctl+f to search "<PACKNAME>Config.Cmake" in "/usr"
 ###################################################################
-                                    #### some macro ####
-## <name>_FOUND
-## <name>_INCLUDE_DIRS  /  <name>_DIRS  / <name>_DIR
-## <name>_LIBRARIES     /  <name>_LIBS  / <name>_LIBRARY
+                                    #### some macro #### 
+## <name>_FOUND                    
+## <name>_LIBRARY_DIRS                 for include_directories()
+## <name>_INCLUDE_DIRS(DIR)            for link_directories()
+## <name>_LIBRARIES(LIBS/LIBRARY)      for target_link_libraries()
 ###################################################################
                                   ####  dependencies  ####
 
@@ -85,8 +86,8 @@ list(APPEND ALL_LIBS ${catkin_LIBRARIES})
 #list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 
 ##                          Eigen
-find_package(Eigen3  REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}/Eigen)
+#find_package(Eigen3  REQUIRED)
+#include_directories(${EIGEN3_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}/Eigen)
 
 
 ##                          Boost
@@ -97,42 +98,53 @@ include_directories(${EIGEN3_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS}/Eigen)
 #list(APPEND ALL_LIBS ${Boost_LIBRARIES})
 
 #                          OpenCV
-find_package(OpenCV  REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-list(APPEND ALL_LIBS ${OpenCV_LIBRARIES})
+#find_package(OpenCV  REQUIRED)
+#include_directories(${OpenCV_INCLUDE_DIRS})
+#list(APPEND ALL_LIBS ${OpenCV_LIBRARIES})
 
 ##                          Sophus
-find_package(Sophus REQUIRED )
-include_directories( ${Sophus_INCLUDE_DIRS} )#link  ${Sophus_LIBRARIES}
-list(APPEND ALL_LIBS ${Sophus_LIBRARIES})
-MESSAGE(STATUS "Sophus inc dir : ${Sophus_INCLUDE_DIR}")
-##							Ceres
+#find_package(Sophus REQUIRED )
+#include_directories( ${Sophus_INCLUDE_DIRS} )#link  ${Sophus_LIBRARIES}
+#list(APPEND ALL_LIBS ${Sophus_LIBRARIES})
+#MESSAGE(STATUS "Sophus inc dir : ${Sophus_INCLUDE_DIR}")
+
+##                          Ceres
 #find_package( Ceres REQUIRED )
 #include_directories( ${CERES_INCLUDE_DIRS} ) #link  ${CERES_LIBRARIES}
 #list(APPEND ALL_LIBS ${CERES_LIBRARIES})
 
-##                         G2O
+##                          G2O
 ##需要添加:module/FindGlog.cmake
-find_package(G2O REQUIRED)
-include_directories(${G2O_INCLUDE_DIR})
-list(APPEND ALL_LIBS g2o_core g2o_stuff g2o_types_sba g2o_csparse_extension)
-##                        CSparse
+#find_package(G2O REQUIRED)
+#include_directories(${G2O_INCLUDE_DIR})
+#list(APPEND ALL_LIBS g2o_core g2o_stuff g2o_types_sba g2o_csparse_extension)
+##                          CSparse
 #需要添加:module/FindCSparse.cmake
-find_package( CSparse REQUIRED)
-include_directories(${CSPARSE_INCLUDE_DIR})
-list(APPEND ALL_LIBS ${CSPARSE_LIBRARY})
-##                         glog
-##需要添加:module/Findglog.cmake
-find_package(Glog REQUIRED)
-include_directories(${GLOG_INCLUDE_DIRS}) #link   ${GLOG_LIBRARIES}
-list(APPEND ALL_LIBS ${GLOG_LIBRARIES})
+#find_package( CSparse REQUIRED)
+#include_directories(${CSPARSE_INCLUDE_DIR})
+#list(APPEND ALL_LIBS ${CSPARSE_LIBRARY})
 
-##                         gtest
+##                          pcl
+# 多版本PCL 需指定路径防止冲突，这里使用本地安装的pcl-1.8, pcl-1.11装入系统
+# set(PCL_DIR "/home/ou/software/library-3-part/pcl-pcl-1.8.1/lib_install/share/pcl-1.8")
+#find_package(PCL 1.8 REQUIRED)
+#include_directories(${PCL_INCLUDE_DIRS})
+#link_directories(${PCL_LIBRARY_DIRS})
+#add_definitions(${PCL_DEFINITIONS})
+#list(APPEND ALL_LIBS ${PCL_LIBRARIES})
+
+##                          glog
+##需要添加:module/Findglog.cmake
+#find_package(Glog REQUIRED)
+#include_directories(${GLOG_INCLUDE_DIRS}) #link   ${GLOG_LIBRARIES}
+#list(APPEND ALL_LIBS ${GLOG_LIBRARIES})
+
+##                          gtest
 #find_package(GTest REQUIRED)
 #include_directories(${GTEST_INCLUDE_DIRS}) #link  ${GTEST_BOTH_LIBRARIES}
 #list(APPEND ALL_LIBS ${GTEST_LIBRARIES})
 
-##                         gflags
+##                          gflags
 #find_package(GFlags REQUIRED)
 #include_directories(${GFLAGS_INCLUDE_DIRS}) #link  ${GFLAGS_LIBRARIES}
 #list(APPEND ALL_LIBS ${GFLAGS_LIBRARIES})

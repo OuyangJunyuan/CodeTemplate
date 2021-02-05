@@ -5,11 +5,14 @@
 ## CMakeLists
 
 ```CMakeList
-find_package(PCL 1.8 REQUIRED )
-include_directories( ${PCL_INCLUDE_DIRS} )
-message("123"${PCL_INCLUDE_DIRS})
-add_definitions( ${PCL_DEFINITIONS} )
+# pcl
+# 多版本PCL 需指定路径防止冲突，这里使用本地安装的pcl-1.8, pcl-1.11装入系统
+set(PCL_DIR "/home/ou/software/library-3-part/pcl-pcl-1.8.1/lib_install/share/pcl-1.8")
+find_package(PCL 1.8 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
 list(APPEND ALL_LIBS ${PCL_LIBRARIES})
+add_definitions(${PCL_DEFINITIONS})
 ```
 
 ## Header
