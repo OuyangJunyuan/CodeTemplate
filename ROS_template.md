@@ -376,7 +376,7 @@ int count;
 double Kp,Ki,Kd;
 int main(int argc, char **argv)
 {
-    //第三个参数(基本名字即不能带'/')为节点名，除非在launch中的<node ... name="xxx"/>重新指定
+    //第三个参数(基本名字即不能带'/')为默认节点名，除非在launch中的<node ... name="xxx"/>重新指定
     //rosrun pack <exename> 由CMakeList指定
     //rosnode list 中出现的是 <nodename> 由第三个参数
     ros::init(argc, argv, "talker");

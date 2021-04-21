@@ -43,3 +43,15 @@ while (!viewer.wasStopped ()) { // 在按下 "q" 键之前一直会显示窗口
 }
 ```
 
+类似imshow()的有如下函数
+
+```c++
+void show_point_cloud(PointCloudPtrType cloud, std::string display_name) {
+  pcl::visualization::CloudViewer viewer(display_name);
+  viewer.showCloud(cloud);
+  while (!viewer.wasStopped())
+  {
+  }
+}
+```
+

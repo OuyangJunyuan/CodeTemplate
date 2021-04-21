@@ -1591,6 +1591,7 @@ controller_spawner节点通过运行python脚本启动两个关节位置控制�
 1. 使用joint_state_publisher，然后用gui手动发布或读取/robot_description中所有未固定的关节。
 2. 给对于的活动jiont的装上</transmission>，然后yaml中写对于关节控制器（不需要launch文件中启动控制器的时候一起启动他，只需启动joint_state_controller即可，如果这个关节不需要控制(是从动的)，只需要吧pid设置成0 0 0）这也可以发布tf。
 3. 写一个插件，手动发布/joint_state
+4. 或者直接使用**libgazebo_ros_ft_sensor.so** 
 
 ```xml
 <launch>
